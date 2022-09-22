@@ -3,6 +3,7 @@ name: ci
 on:
 - pull_request
 - push
+- workflow_dispatch
 
 jobs:
   test:
@@ -19,7 +20,7 @@ jobs:
           npm-i: mocha@7.2.0
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Node.js ${{ matrix.node-version }}
       shell: bash -eo pipefail -l {0}
@@ -27,29 +28,29 @@ jobs:
         nvm install --default ${{ matrix.node-version }}
         dirname "$(nvm which ${{ matrix.node-version }})" >> "$GITHUB_PATH"
 
-    - name: Configure npm
-      run: |
-        npm config set loglevel error
-        npm config set shrinkwrap false
+    #- name: Configure npm
+    #  run: |
+    #    npm config set loglevel error
+    #    npm config set shrinkwrap false
 
     - name: Install npm module(s) ${{ matrix.npm-i }}
       run: npm install --save-dev ${{ matrix.npm-i }}
       if: matrix.npm-i != ''
 
-    - name: Remove non-test dependencies
-      run: npm rm --silent --save-dev connect-redis
+    #- name: Remove non-test dependencies
+    #  run: npm rm --silent --save-dev connect-redis
 
-    - name: Setup Node.js version-specific dependencies
-      shell: bash
-      run: |
-        # eslint for linting
-        # - remove on Node.js < 10
-        if [[ "$(cut -d. -f1 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
-          node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
-            grep -E '^eslint(-|$)' | \
-            sort -r | \
-            xargs -n1 npm rm --silent --save-dev
-        fi
+    #- name: Setup Node.js version-specific dependencies
+    #  shell: bash
+    #  run: |
+    #    # eslint for linting
+    #    # - remove on Node.js < 10
+    #    if [[ "$(cut -d. -f1 <<< "${{ matrix.node-version }}")" -lt 10 ]]; then
+    #      node -pe 'Object.keys(require("./package").devDependencies).join("\n")' | \
+    #        grep -E '^eslint(-|$)' | \
+    #        sort -r | \
+    #        xargs -n1 npm rm --silent --save-dev
+    #    fi
 
     - name: Install Node.js dependencies
       run: npm install
